@@ -1,0 +1,921 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Maksym Rodin Atelier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Hanken+Grotesk:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+/* Layout: "gallery after hours" — a dark, quiet exhibition. Full-bleed hero, a hover-preview project index,
+   long-scroll project pages with drawings pinned on bone-coloured paper, one curtain transition between rooms. */
+:root{
+  color-scheme:dark;
+  --ink:#100F0D;        /* gallery wall at night */
+  --ink-2:#181714;      /* raised surface */
+  --ink-3:#24221E;      /* hover / chips */
+  --bone:#ECE6DB;       /* type and drawing paper */
+  --bone-dim:#A9A398;   /* secondary text */
+  --bone-faint:#6E6A62; /* captions, rules */
+  --line:rgba(236,230,219,.14);
+  --stone:#C8B48F;      /* Portland stone accent, used sparingly */
+  --paper:#EDE8DF;      /* sheet backing for drawings */
+  --veil:rgba(10,9,8,.55);
+  --display:"Bodoni Moda","Didot","Bodoni 72",Georgia,serif;
+  --sans:"Hanken Grotesk","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --gutter:clamp(16px,4vw,64px);
+  --ease:cubic-bezier(.22,.8,.18,1);
+  --ease-io:cubic-bezier(.76,0,.24,1);
+}
+*{box-sizing:border-box}
+html,body{background:var(--ink);color:var(--bone)}
+html.lenis,html.lenis body{height:auto}
+.lenis.lenis-smooth{scroll-behavior:auto!important}
+body{font:300 16px/1.7 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+p{margin:0}
+h1,h2,h3{margin:0;font-weight:400;text-wrap:balance}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+::selection{background:var(--stone);color:var(--ink)}
+:focus-visible{outline:1px solid var(--stone);outline-offset:4px}
+.wrap{padding-inline:var(--gutter);max-width:1680px;margin-inline:auto}
+.eyebrow{font:500 11px/1.4 var(--sans);letter-spacing:.24em;text-transform:uppercase;color:var(--bone-dim)}
+.mono{font:400 11.5px/1.5 var(--mono);letter-spacing:.04em;color:var(--bone-faint)}
+.serif{font-family:var(--display)}
+[hidden]{display:none!important}
+
+/* ---------- loader ---------- */
+.loader{position:fixed;inset:0;z-index:100;background:var(--ink);display:grid;place-items:center;transition:transform 1.1s var(--ease-io)}
+.loader.done{transform:translateY(-100%)}
+.loader-name{font:400 clamp(28px,5vw,64px)/1 var(--display);letter-spacing:.32em;text-transform:uppercase;margin-right:-.32em;display:flex;overflow:hidden}
+.loader-name span{display:inline-block;transform:translateY(105%);animation:rise .9s var(--ease) forwards}
+.loader-bar{position:absolute;left:var(--gutter);right:var(--gutter);bottom:calc(env(safe-area-inset-bottom,0px) + 40px);height:1px;background:var(--line)}
+.loader-bar i{display:block;height:100%;background:var(--stone);transform-origin:left;animation:grow 1.1s var(--ease) forwards}
+@keyframes rise{to{transform:none}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
+/* ---------- curtain (page transition) ---------- */
+.curtain{position:fixed;inset:0;z-index:90;background:var(--ink-2);transform:translateY(100%);pointer-events:none;display:grid;place-items:center}
+.curtain.cover{transition:transform .65s var(--ease-io);transform:none}
+.curtain.leave{transition:transform .75s var(--ease-io);transform:translateY(-100%)}
+.curtain span{font:italic 400 clamp(26px,4vw,52px)/1 var(--display);color:var(--bone-dim)}
+
+/* ---------- header ---------- */
+.hdr{position:fixed;z-index:60;top:0;left:0;right:0;padding-top:calc(env(safe-area-inset-top,0px) + 22px);padding-bottom:18px;transition:transform .6s var(--ease),background .5s}
+.hdr .wrap{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.hdr.solid{background:linear-gradient(var(--ink) 30%,rgba(16,15,13,0))}
+.hdr.hide{transform:translateY(-110%)}
+.brand{font:500 12px/1 var(--sans);letter-spacing:.38em;text-transform:uppercase;display:flex;gap:14px;align-items:center}
+.brand i{font:italic 400 15px/1 var(--display);letter-spacing:0;text-transform:none;color:var(--bone-dim)}
+.nav{display:flex;gap:6px;align-items:center}
+.nav a{position:relative;font:500 11.5px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;padding:12px 14px;color:var(--bone-dim);transition:color .4s}
+.nav a::after{content:"";position:absolute;left:14px;right:14px;bottom:6px;height:1px;background:var(--bone);transform:scaleX(0);transform-origin:right;transition:transform .6s var(--ease)}
+.nav a:hover,.nav a[aria-current="page"]{color:var(--bone)}
+.nav a:hover::after,.nav a[aria-current="page"]::after{transform:scaleX(1);transform-origin:left}
+.menu-btn{display:none;font:500 11.5px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;padding:12px 0}
+@media (max-width:760px){.nav{display:none}.menu-btn{display:block}.brand i{display:none}}
+.sheet-menu{position:fixed;inset:0;z-index:70;background:var(--ink-2);display:grid;align-content:center;gap:6px;padding:var(--gutter);clip-path:inset(0 0 100% 0);transition:clip-path .8s var(--ease-io);visibility:hidden}
+.sheet-menu.open{clip-path:inset(0);visibility:visible}
+.sheet-menu a{font:400 clamp(40px,12vw,64px)/1.15 var(--display)}
+.sheet-menu a em{font-size:.45em;font-style:normal;font-family:var(--mono);color:var(--bone-faint);margin-left:10px;vertical-align:super}
+.sheet-menu .close{position:absolute;top:calc(env(safe-area-inset-top,0px) + 22px);right:var(--gutter);font:500 11.5px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;padding:12px 0}
+
+/* ---------- cursor ---------- */
+.cur{position:fixed;z-index:95;top:0;left:0;pointer-events:none;display:none}
+@media (hover:hover) and (pointer:fine){.cur{display:block}}
+.cur-dot{position:absolute;width:6px;height:6px;margin:-3px;border-radius:50%;background:var(--bone)}
+.cur-ring{position:absolute;width:38px;height:38px;margin:-19px;border-radius:50%;border:1px solid rgba(236,230,219,.4);display:grid;place-items:center;transition:width .5s var(--ease),height .5s var(--ease),margin .5s var(--ease),background .5s,border-color .5s}
+.cur-ring b{font:500 10px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--ink);opacity:0;transition:opacity .3s}
+.cur.big .cur-ring{width:92px;height:92px;margin:-46px;background:var(--bone);border-color:var(--bone)}
+.cur.big .cur-ring b{opacity:1}
+.cur.big .cur-dot{opacity:0}
+
+/* ---------- motion helpers ---------- */
+.up{display:block;overflow:hidden}
+.up>span{display:block}
+.enter .up>span{animation:lineUp 1.1s var(--ease) both}
+.enter .up:nth-child(2)>span{animation-delay:.08s}
+.enter .up:nth-child(3)>span{animation-delay:.16s}
+.enter .fade{animation:fadeUp 1.2s var(--ease) .25s both}
+body:not(.ready) .enter .up>span,body:not(.ready) .enter .fade{animation-play-state:paused}
+@keyframes lineUp{from{transform:translateY(110%)}to{transform:none}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.frame{overflow:hidden;position:relative;background:var(--ink-2)}
+.frame img{width:100%;height:100%;object-fit:cover;transform:scale(1.12);transition:transform 1.8s var(--ease)}
+.frame.in img{transform:scale(1)}
+.frame[data-par] img{transform:translate3d(0,var(--py,0px),0) scale(1.14);transition:none}
+.frame.paper{background:var(--paper)}
+.frame.paper img{object-fit:contain;padding:5%;mix-blend-mode:multiply}
+
+/* ---------- hero ---------- */
+.hero{position:relative;height:max(620px,min(100svh,1080px));overflow:hidden;background:#000}
+.hero-slide{position:absolute;inset:0;opacity:0;transition:opacity 1.6s var(--ease)}
+.hero-slide.on{opacity:1;z-index:1}
+.hero-slide img{width:100%;height:100%;object-fit:cover;transform:scale(1.08);transition:transform 8s linear}
+.hero-slide.on img{transform:scale(1)}
+.hero::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(180deg,rgba(10,9,8,.55) 0%,rgba(10,9,8,0) 30%,rgba(10,9,8,0) 52%,rgba(10,9,8,.78) 100%);pointer-events:none}
+.hero-copy{position:absolute;z-index:3;left:0;right:0;bottom:clamp(30px,6vw,72px)}
+.hero-copy .wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:30px}
+.hero h1{font:400 clamp(52px,10.4vw,168px)/.92 var(--display);letter-spacing:-.02em}
+.hero h1 em{font-style:italic;color:var(--stone)}
+.hero-sub{margin-top:26px;display:flex;flex-wrap:wrap;gap:10px 28px;align-items:center}
+.hero-side{display:grid;gap:18px;justify-items:end;min-width:220px}
+.hero-cap{text-align:right;display:grid;gap:4px}
+.hero-cap b{font:italic 400 20px/1.2 var(--display)}
+.hero-ctrl{display:flex;align-items:center;gap:16px}
+.hero-count{font:400 12px/1 var(--mono);color:var(--bone-dim);font-variant-numeric:tabular-nums}
+.hero-prog{width:120px;height:1px;background:rgba(236,230,219,.25);overflow:hidden}
+.hero-prog i{display:block;height:100%;background:var(--bone);transform-origin:left;transform:scaleX(0)}
+.hero-prog i.run{animation:grow 6.5s linear forwards}
+.circle{width:46px;height:46px;border-radius:50%;border:1px solid rgba(236,230,219,.35);display:grid;place-items:center;transition:background .4s,border-color .4s,color .4s}
+.circle:hover{background:var(--bone);border-color:var(--bone);color:var(--ink)}
+.circle svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.3}
+.pill{display:inline-flex;align-items:center;gap:12px;font:500 11.5px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;padding:17px 26px;border-radius:999px;border:1px solid rgba(236,230,219,.4);position:relative;overflow:hidden;isolation:isolate;transition:color .5s var(--ease),border-color .5s}
+.pill::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--bone);transform:translateY(101%);border-radius:inherit;transition:transform .6s var(--ease)}
+.pill:hover{color:var(--ink);border-color:var(--bone)}
+.pill:hover::before{transform:none}
+.pill svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.4;transition:transform .5s var(--ease)}
+.pill:hover svg{transform:translateX(4px)}
+.scroll-cue{position:absolute;z-index:3;left:50%;bottom:22px;width:1px;height:46px;background:rgba(236,230,219,.2);overflow:hidden}
+.scroll-cue i{position:absolute;inset:0;background:var(--bone);animation:drip 2.4s var(--ease-io) infinite}
+@keyframes drip{0%{transform:translateY(-100%)}60%,100%{transform:translateY(100%)}}
+@media (max-width:760px){.hero-copy .wrap{grid-template-columns:1fr}.hero-side{justify-items:start}.hero-cap{text-align:left}.scroll-cue{display:none}}
+
+/* ---------- home sections ---------- */
+.sec{padding-block:clamp(90px,12vw,180px)}
+.statement{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,9fr);gap:clamp(24px,5vw,80px)}
+.statement p.big{font:400 clamp(28px,3.6vw,54px)/1.22 var(--display);letter-spacing:-.01em;max-width:24ch}
+.statement p.big em{color:var(--stone)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;margin-top:clamp(50px,6vw,90px);border-top:1px solid var(--line);padding-top:28px}
+.stat b{display:block;font:400 clamp(34px,4vw,56px)/1 var(--display);font-variant-numeric:lining-nums tabular-nums}
+.stat span{display:block;margin-top:10px;font-size:13.5px;color:var(--bone-dim);max-width:24ch}
+@media (max-width:820px){.statement{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.feat-head{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;margin-bottom:clamp(40px,5vw,70px)}
+.feat-head h2{font:400 clamp(38px,5.4vw,84px)/1 var(--display)}
+.feat-head h2 em{color:var(--stone)}
+.feat{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(40px,6vw,110px) clamp(16px,2vw,32px)}
+.fcard{display:grid;gap:18px;min-width:0}
+.fcard:nth-child(1){grid-column:1/8}
+.fcard:nth-child(2){grid-column:9/13;margin-top:clamp(80px,14vw,240px)}
+.fcard:nth-child(3){grid-column:2/7}
+.fcard:nth-child(4){grid-column:8/13;margin-top:clamp(40px,8vw,140px)}
+.fcard .frame{aspect-ratio:4/5}
+.fcard:nth-child(1) .frame{aspect-ratio:5/4}
+.fcard-meta{display:flex;justify-content:space-between;gap:16px;align-items:baseline}
+.fcard h3{font:400 clamp(24px,2.3vw,34px)/1.1 var(--display);transition:color .4s}
+.fcard:hover h3{color:var(--stone)}
+.fcard p{color:var(--bone-dim);font-size:14.5px;max-width:46ch}
+@media (max-width:760px){.feat .fcard{grid-column:1/-1!important;margin-top:0!important}}
+
+.marq{border-block:1px solid var(--line);overflow:hidden;padding-block:26px;white-space:nowrap}
+.marq-track{display:inline-flex;gap:48px;animation:marq 40s linear infinite;padding-right:48px}
+.marq-track span{font:italic 400 clamp(26px,3.2vw,46px)/1 var(--display);color:var(--bone-dim)}
+.marq-track i{font-style:normal;color:var(--stone)}
+@keyframes marq{to{transform:translateX(-50%)}}
+
+.strip-head{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;margin-bottom:34px}
+.strip-head h2{font:400 clamp(32px,4vw,60px)/1.05 var(--display)}
+.strip{display:flex;gap:clamp(12px,1.4vw,22px);overflow-x:auto;scroll-snap-type:x proximity;padding-inline:var(--gutter);padding-bottom:18px;cursor:grab;scrollbar-width:thin;scrollbar-color:var(--bone-faint) transparent;overscroll-behavior-x:contain}
+.strip.drag{cursor:grabbing;scroll-snap-type:none}
+.strip figure{margin:0;flex:0 0 clamp(220px,24vw,340px);scroll-snap-align:start;display:grid;gap:10px}
+.strip .frame{aspect-ratio:3/4}
+.strip img{pointer-events:none;user-select:none}
+.strip figcaption{font-size:13px;color:var(--bone-dim)}
+
+.cta{display:grid;justify-items:center;text-align:center;gap:30px}
+.cta h2{font:400 clamp(44px,8vw,128px)/.98 var(--display);letter-spacing:-.02em}
+.cta h2 em{color:var(--stone)}
+
+/* ---------- work index ---------- */
+.page{padding-top:calc(env(safe-area-inset-top,0px) + clamp(130px,15vw,200px))}
+.ph{display:grid;gap:22px;margin-bottom:clamp(40px,5vw,72px)}
+.ph h1{font:400 clamp(56px,10vw,156px)/.92 var(--display);letter-spacing:-.02em}
+.ph h1 em{color:var(--stone)}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border-block:1px solid var(--line);padding-block:14px;margin-bottom:10px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:500 11px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;padding:11px 16px;border-radius:999px;border:1px solid var(--line);color:var(--bone-dim);transition:all .4s var(--ease)}
+.chip:hover{border-color:var(--bone-faint);color:var(--bone)}
+.chip[aria-pressed="true"]{background:var(--bone);color:var(--ink);border-color:var(--bone)}
+.chip sup{font-family:var(--mono);font-size:9px;margin-left:4px;letter-spacing:0}
+.seg{display:flex;border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{font:500 11px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;padding:9px 16px;border-radius:999px;color:var(--bone-dim);transition:all .4s var(--ease)}
+.seg button[aria-pressed="true"]{background:var(--ink-3);color:var(--bone)}
+
+.rows{list-style:none;margin:0;padding:0}
+.row{border-bottom:1px solid var(--line)}
+.row a{display:grid;grid-template-columns:72px minmax(0,1fr) minmax(0,.9fr) 120px 30px;gap:20px;align-items:center;padding-block:clamp(22px,2.6vw,34px);transition:padding .6s var(--ease),color .4s}
+.row .yr{font:400 12px/1 var(--mono);color:var(--bone-faint)}
+.row h3{font:400 clamp(30px,4.2vw,64px)/1 var(--display);transition:transform .7s var(--ease),color .4s}
+.row .pl{font-size:14px;color:var(--bone-dim)}
+.row .cat{font:500 10.5px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--bone-faint);text-align:right}
+.row svg{width:22px;height:22px;stroke:var(--bone-dim);fill:none;stroke-width:1.2;transition:transform .6s var(--ease),stroke .4s}
+.rows:hover .row a{color:var(--bone-faint)}
+.rows .row a:hover{color:var(--bone)}
+.row a:hover h3{transform:translateX(18px);color:var(--bone)}
+.row a:hover svg{transform:rotate(-45deg);stroke:var(--stone)}
+.row-thumb{display:none}
+@media (max-width:860px){
+  .row a{grid-template-columns:minmax(0,1fr) auto;gap:8px 16px}
+  .row .pl,.row svg{display:none}
+  .row .yr{grid-column:2;grid-row:1;text-align:right}
+  .row h3{grid-column:1;grid-row:1}
+  .row .cat{grid-column:1/-1;text-align:left}
+  .row-thumb{display:block;grid-column:1/-1;aspect-ratio:16/9;margin-top:8px}
+}
+.peek{position:fixed;z-index:40;top:0;left:0;width:clamp(260px,24vw,380px);aspect-ratio:4/5;pointer-events:none;overflow:hidden;opacity:0;transform:scale(.85);transition:opacity .45s var(--ease),transform .6s var(--ease);display:none}
+@media (hover:hover) and (pointer:fine) and (min-width:861px){.peek{display:block}}
+.peek.on{opacity:1;transform:scale(1)}
+.peek img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.15);transition:opacity .5s,transform 1s var(--ease)}
+.peek img.on{opacity:1;transform:scale(1)}
+
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(30px,4vw,60px) clamp(14px,1.6vw,26px);padding-top:30px}
+@media (max-width:1000px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.cards{grid-template-columns:1fr}}
+.card{display:grid;gap:14px}
+.card .frame{aspect-ratio:4/3}
+.card .frame img{transition:transform 1.4s var(--ease)}
+.card:hover .frame img{transform:scale(1.05)}
+.card h3{font:400 24px/1.15 var(--display)}
+.card .mono{display:flex;justify-content:space-between;gap:10px}
+
+/* ---------- project page ---------- */
+.p-hero{position:relative;height:max(560px,min(92svh,960px));overflow:hidden}
+.p-hero .frame{position:absolute;inset:0;height:100%}
+.p-hero .frame.paper img{padding:8% 6% 22%}
+.p-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,9,8,.5),rgba(10,9,8,0) 30%,rgba(10,9,8,0) 50%,rgba(10,9,8,.85));pointer-events:none}
+.p-hero.on-paper::after{background:linear-gradient(180deg,rgba(10,9,8,0) 55%,rgba(10,9,8,.9))}
+.p-title{position:absolute;z-index:2;left:0;right:0;bottom:clamp(30px,5vw,64px)}
+.p-title .wrap{display:grid;gap:18px}
+.p-title h1{font:400 clamp(48px,9vw,148px)/.92 var(--display);letter-spacing:-.02em}
+.p-title .eyebrow{color:var(--bone)}
+.p-body{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,9fr);gap:clamp(30px,5vw,90px);padding-block:clamp(60px,8vw,120px) 0;align-items:start}
+.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 100px);display:grid;gap:26px}
+.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:2px;border-left:1px solid var(--line)}
+.toc a{display:block;padding:7px 0 7px 16px;margin-left:-1px;border-left:1px solid transparent;font-size:13.5px;color:var(--bone-faint);transition:color .4s,border-color .4s}
+.toc a:hover{color:var(--bone)}
+.toc a.on{color:var(--bone);border-color:var(--stone)}
+.toc-prog{height:1px;background:var(--line);overflow:hidden}
+.toc-prog i{display:block;height:100%;background:var(--stone);transform-origin:left;transform:scaleX(0)}
+@media (max-width:900px){.p-body{grid-template-columns:1fr}.toc{display:none}}
+.p-main{display:grid;gap:clamp(70px,9vw,140px);min-width:0}
+.intro{display:grid;gap:clamp(40px,5vw,70px)}
+.lead{font:400 clamp(26px,2.9vw,42px)/1.28 var(--display);max-width:30ch}
+.intro-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(30px,4vw,70px)}
+.intro-cols .txt{display:grid;gap:18px;color:var(--bone-dim);max-width:60ch}
+.facts{margin:0;display:grid;border-top:1px solid var(--line)}
+.facts div{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr);gap:16px;padding-block:13px;border-bottom:1px solid var(--line)}
+.facts dt{font:500 10.5px/1.7 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--bone-faint)}
+.facts dd{margin:0;font-size:14.5px}
+@media (max-width:700px){.intro-cols{grid-template-columns:1fr}}
+.chap{display:grid;gap:clamp(28px,3vw,44px);scroll-margin-top:110px}
+.chap-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:clamp(20px,4vw,60px);align-items:start}
+.chap-head h2{font:400 clamp(30px,3.4vw,50px)/1.05 var(--display)}
+.chap-head h2 small{display:block;margin-bottom:14px;font:400 11.5px/1 var(--mono);color:var(--stone);letter-spacing:.06em}
+.chap-copy{display:grid;gap:16px;color:var(--bone-dim);max-width:60ch}
+.chap-copy .quote{font:italic 400 clamp(22px,2.2vw,30px)/1.4 var(--display);color:var(--bone)}
+@media (max-width:700px){.chap-head{grid-template-columns:1fr}}
+.checks{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.checks li{padding:12px 0;border-bottom:1px solid var(--line);font-size:14.5px;color:var(--bone);display:flex;gap:14px}
+.checks li::before{content:"";flex:0 0 6px;height:6px;margin-top:9px;border-radius:50%;background:var(--stone)}
+.gal{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(10px,1.2vw,18px)}
+.g{grid-column:span 6;margin:0;display:grid;gap:10px;align-content:start;min-width:0}
+.g.w12{grid-column:span 12}.g.w8{grid-column:span 8}.g.w4{grid-column:span 4}.g.w3{grid-column:span 3}.g.w2{grid-column:span 2}
+@media (max-width:820px){.g,.g.w8,.g.w4{grid-column:span 12}.g.w3{grid-column:span 6}.g.w2{grid-column:span 4}}
+.g .frame{cursor:zoom-in;width:100%;display:block}
+.g figcaption{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;line-height:1.5;color:var(--bone-faint)}
+.g figcaption em{font:400 11px/1.5 var(--mono);font-style:normal;color:var(--stone);white-space:nowrap}
+.r169{aspect-ratio:16/9}.r32{aspect-ratio:3/2}.r43{aspect-ratio:4/3}.r11{aspect-ratio:1}.r34{aspect-ratio:3/4}.r23{aspect-ratio:2/3}.r219{aspect-ratio:21/9}.r45{aspect-ratio:4/5}
+
+.next{display:block;position:relative;margin-top:clamp(100px,12vw,180px);border-top:1px solid var(--line);padding-block:clamp(60px,8vw,110px);overflow:hidden}
+.next .wrap{display:grid;gap:18px;position:relative;z-index:2}
+.next h2{font:400 clamp(48px,9vw,140px)/.95 var(--display);letter-spacing:-.02em;transition:transform .9s var(--ease)}
+.next:hover h2{transform:translateX(24px)}
+.next .bgimg{position:absolute;inset:0;opacity:0;transition:opacity .8s var(--ease)}
+.next .bgimg img{width:100%;height:100%;object-fit:cover;transform:scale(1.08);transition:transform 2s var(--ease)}
+.next:hover .bgimg{opacity:.28}
+.next:hover .bgimg img{transform:scale(1)}
+
+/* ---------- about ---------- */
+.ab{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(30px,6vw,110px);align-items:start}
+.ab .frame{aspect-ratio:4/5}
+.ab-copy{display:grid;gap:24px}
+.ab-copy .lead{max-width:22ch}
+.ab-copy p{color:var(--bone-dim);max-width:60ch}
+.ab-copy p b{font-weight:500;color:var(--bone)}
+@media (max-width:860px){.ab{grid-template-columns:1fr}}
+.cv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(40px,4vw,70px) clamp(24px,4vw,70px);margin-top:clamp(80px,9vw,140px)}
+@media (max-width:960px){.cv{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.cv{grid-template-columns:1fr}}
+.cv section{display:grid;gap:16px;align-content:start;border-top:1px solid var(--line);padding-top:22px}
+.cv h3{font:500 11px/1.5 var(--sans);letter-spacing:.24em;text-transform:uppercase;color:var(--stone)}
+.entry{display:grid;gap:3px}
+.entry i{font:400 11px/1.5 var(--mono);font-style:normal;color:var(--bone-faint)}
+.entry strong{font-weight:500;font-size:15px}
+.entry span{font-size:14px;color:var(--bone-dim)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tags span{font-size:12.5px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);color:var(--bone-dim)}
+
+/* ---------- contact ---------- */
+.ct{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(40px,6vw,110px);align-items:start}
+@media (max-width:900px){.ct{grid-template-columns:1fr}}
+.ct-list{display:grid;border-top:1px solid var(--line)}
+.ct-row{display:grid;grid-template-columns:140px minmax(0,1fr) auto;gap:16px;align-items:center;padding-block:22px;border-bottom:1px solid var(--line)}
+.ct-row dt{font:500 10.5px/1.5 var(--sans);letter-spacing:.22em;text-transform:uppercase;color:var(--bone-faint)}
+.ct-row dd{margin:0;font:400 clamp(19px,2vw,28px)/1.2 var(--display);overflow-wrap:anywhere}
+.copy{font:500 10.5px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;padding:10px 14px;border-radius:999px;border:1px solid var(--line);color:var(--bone-dim);transition:all .4s}
+.copy:hover{border-color:var(--bone);color:var(--bone)}
+.copy.ok{background:var(--stone);border-color:var(--stone);color:var(--ink)}
+@media (max-width:560px){.ct-row{grid-template-columns:1fr auto}.ct-row dt{grid-column:1/-1}}
+.ct-note{display:grid;gap:18px;color:var(--bone-dim)}
+.clock{display:flex;gap:14px;align-items:center;font:400 12px/1 var(--mono);color:var(--bone-dim)}
+.clock i{width:7px;height:7px;border-radius:50%;background:#7FB08A;box-shadow:0 0 0 4px rgba(127,176,138,.15)}
+
+/* ---------- footer ---------- */
+.foot{margin-top:clamp(110px,12vw,180px);border-top:1px solid var(--line);padding-block:40px calc(env(safe-area-inset-bottom,0px) + 40px)}
+.foot .wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px 40px;align-items:end}
+.foot-name{font:400 clamp(40px,9vw,150px)/.9 var(--display);letter-spacing:-.02em;color:var(--ink-3);-webkit-text-stroke:1px var(--bone-faint)}
+.foot p{font-size:12.5px;color:var(--bone-faint);max-width:70ch}
+.top-btn{font:500 11px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--bone-dim);display:flex;gap:10px;align-items:center}
+@media (max-width:700px){.foot .wrap{grid-template-columns:1fr}}
+
+/* ---------- viewer ---------- */
+.lb{position:fixed;inset:0;z-index:80;background:rgba(10,9,8,.96);display:grid;grid-template-rows:auto minmax(0,1fr) auto;padding:calc(env(safe-area-inset-top,0px) + 18px) var(--gutter) calc(env(safe-area-inset-bottom,0px) + 18px);opacity:0;visibility:hidden;transition:opacity .5s var(--ease),visibility .5s}
+.lb.open{opacity:1;visibility:visible}
+.lb-top,.lb-bot{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.lb-count{font:400 12px/1 var(--mono);color:var(--bone-dim);font-variant-numeric:tabular-nums}
+.lb-stage{position:relative;display:grid;place-items:center;min-height:0;padding-block:16px}
+.lb-stage img{max-width:100%;max-height:100%;object-fit:contain;transform:scale(.96);opacity:0;transition:transform .7s var(--ease),opacity .5s}
+.lb-stage img.on{transform:none;opacity:1}
+.lb-stage img.paper{background:var(--paper);padding:2%}
+.lb-cap{flex:1;text-align:center;font-size:14px;color:var(--bone-dim)}
+.lb-thumbs{display:flex;gap:6px;overflow-x:auto;justify-content:center;padding-top:14px;scrollbar-width:none}
+.lb-thumbs button{flex:0 0 54px;height:40px;opacity:.35;transition:opacity .3s;overflow:hidden;border:1px solid transparent}
+.lb-thumbs button.on{opacity:1;border-color:var(--bone)}
+.lb-thumbs img{width:100%;height:100%;object-fit:cover}
+@media (max-width:600px){.lb-thumbs{display:none}}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .frame img,.hero-slide img{transform:none!important}
+  .loader{display:none}
+}
+</style>
+
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader-name" id="loader-name"></div>
+  <div class="loader-bar"><i></i></div>
+</div>
+<div class="curtain" id="curtain" aria-hidden="true"><span id="curtain-label"></span></div>
+<div class="cur" id="cur" aria-hidden="true"><div class="cur-ring"><b id="cur-label">View</b></div><div class="cur-dot"></div></div>
+<div class="peek" id="peek" aria-hidden="true"></div>
+
+<header class="hdr" id="hdr">
+  <div class="wrap">
+    <a class="brand" href="#home" aria-label="Maksym Rodin, home">Maksym Rodin <i>Interior Architecture</i></a>
+    <nav class="nav" aria-label="Main">
+      <a href="#work" data-nav="work">Work</a>
+      <a href="#about" data-nav="about">About</a>
+      <a href="#contact" data-nav="contact">Contact</a>
+    </nav>
+    <button class="menu-btn" id="menu-open" type="button" aria-expanded="false" aria-controls="sheet-menu">Menu</button>
+  </div>
+</header>
+<div class="sheet-menu" id="sheet-menu" aria-label="Menu">
+  <button class="close" id="menu-close" type="button">Close</button>
+  <a href="#home">Home</a>
+  <a href="#work">Work<em id="menu-count"></em></a>
+  <a href="#about">About</a>
+  <a href="#contact">Contact</a>
+</div>
+
+<main id="main">
+<!-- HOME -->
+<section class="view" id="v-home" aria-label="Home">
+  <div class="hero">
+    <div id="slides"></div>
+    <div class="hero-copy">
+      <div class="wrap">
+        <div>
+          <h1><span class="up"><span>Inside</span></span><span class="up"><span>what is <em>standing</em></span></span></h1>
+          <div class="hero-sub fade">
+            <span class="eyebrow" style="color:var(--bone)">Maksym Rodin · Interior Architecture + Design · London</span>
+            <a class="pill" href="#work">Selected work <svg viewBox="0 0 16 16"><path d="M2 8h12M9 3l5 5-5 5"/></svg></a>
+          </div>
+        </div>
+        <div class="hero-side fade">
+          <div class="hero-cap" id="hero-cap"></div>
+          <div class="hero-ctrl">
+            <span class="hero-count" id="hero-count"></span>
+            <div class="hero-prog"><i id="hero-prog"></i></div>
+            <button class="circle" type="button" id="prev-slide" aria-label="Previous image"><svg viewBox="0 0 16 16"><path d="M10 3 5 8l5 5"/></svg></button>
+            <button class="circle" type="button" id="next-slide" aria-label="Next image"><svg viewBox="0 0 16 16"><path d="m6 3 5 5-5 5"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-cue"><i></i></div>
+  </div>
+
+  <div class="wrap sec">
+    <div class="statement">
+      <p class="eyebrow">The practice</p>
+      <div>
+        <p class="big">I design new lives for <em>old buildings</em>, and draw them carefully enough to be built.</p>
+        <div class="stats">
+          <div class="stat"><b>1<sup style="font-size:.4em">st</sup></b><span>Class Honours, BA Interior Architecture and Design, 2026</span></div>
+          <div class="stat"><b>7</b><span>projects across three years, from sketchbook to listed building</span></div>
+          <div class="stat"><b>1,200<small style="font-size:.4em"> m²</small></b><span>Echo Cave, inside a Grade II listed store on Oxford Street</span></div>
+          <div class="stat"><b>81</b><span>dissertation mark, biophilic design in prisons</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="feat-head">
+      <h2>Selected <em>work</em></h2>
+      <a class="pill" href="#work">All seven projects <svg viewBox="0 0 16 16"><path d="M2 8h12M9 3l5 5-5 5"/></svg></a>
+    </div>
+    <div class="feat" id="feat"></div>
+  </div>
+
+  <div class="sec" style="padding-bottom:0">
+    <div class="marq" aria-hidden="true"><div class="marq-track" id="marq"></div></div>
+  </div>
+
+  <div class="sec">
+    <div class="wrap strip-head">
+      <div><p class="eyebrow">Year one · the Moleskine</p><h2 class="serif" style="margin-top:12px">Drawn by hand first</h2></div>
+      <a class="pill" href="#moleskine">Open the sketchbook <svg viewBox="0 0 16 16"><path d="M2 8h12M9 3l5 5-5 5"/></svg></a>
+    </div>
+    <div class="strip" id="strip" aria-label="Sketchbook pages, drag to scroll"></div>
+  </div>
+
+  <div class="wrap sec cta">
+    <p class="eyebrow">Available now · full time · London</p>
+    <h2>Let's build<br>something <em>lasting</em></h2>
+    <a class="pill" href="#contact">Get in touch <svg viewBox="0 0 16 16"><path d="M2 8h12M9 3l5 5-5 5"/></svg></a>
+  </div>
+</section>
+
+<!-- WORK -->
+<section class="view wrap page" id="v-work" hidden>
+  <div class="ph">
+    <p class="eyebrow">Index · 2023 — 2026</p>
+    <h1><span class="up"><span>Selected</span></span><span class="up"><span><em>work</em></span></span></h1>
+  </div>
+  <div class="toolbar">
+    <div class="chips" id="chips" role="group" aria-label="Filter by year"></div>
+    <div class="seg" role="group" aria-label="Layout">
+      <button type="button" id="as-list" aria-pressed="true">List</button>
+      <button type="button" id="as-grid" aria-pressed="false">Grid</button>
+    </div>
+  </div>
+  <ul class="rows" id="rows"></ul>
+  <div class="cards" id="cards" hidden></div>
+</section>
+
+<!-- PROJECT -->
+<section class="view" id="v-project" hidden></section>
+
+<!-- ABOUT -->
+<section class="view wrap page" id="v-about" hidden>
+  <div class="ph">
+    <p class="eyebrow">About</p>
+    <h1><span class="up"><span>Both ends of</span></span><span class="up"><span>a <em>project</em></span></span></h1>
+  </div>
+  <div class="ab">
+    <div class="frame" data-par><img src="img/portrait.jpg" alt="Portrait of Maksym Rodin" loading="lazy"></div>
+    <div class="ab-copy">
+      <p class="lead">An interior architect in London, working inside buildings that are already standing.</p>
+      <p><b>I graduated</b> from London Metropolitan University in 2026 with a First Class BA (Hons) in Interior Architecture and Design.</p>
+      <p><b>My focus is adaptive reuse.</b> I like working inside existing buildings, often listed ones, and finding a new use that the old fabric can carry without losing what makes it worth keeping.</p>
+      <p><b>I work at both ends of a project:</b> the first sketch and the drawing package that gets it built. In most offices those are done by different people. I want to keep doing both.</p>
+      <p><b>My research</b> looks at how rooms affect the people in them. My dissertation, marked 81, studied biophilic design in prisons through two case studies: Khoo Teck Puat Hospital in Singapore and Maggie's West London.</p>
+      <p><b>I am looking</b> for a junior interior design or design assistant role in London, and I can start straight away.</p>
+      <div><a class="pill" href="#contact">Contact me <svg viewBox="0 0 16 16"><path d="M2 8h12M9 3l5 5-5 5"/></svg></a></div>
+    </div>
+  </div>
+  <div class="cv">
+    <section>
+      <h3>Education</h3>
+      <div class="entry"><i>2023 — 2026</i><strong>BA (Hons) Interior Architecture and Design</strong><span>London Metropolitan University. First Class Honours. Classification average 78.11%. Final-year modules marked 80, 80 and 80; dissertation 81.</span></div>
+      <div class="entry"><i>2020 — 2023</i><strong>Diploma, College Preparatory Program</strong><span>TASIS The American School in England, Thorpe, Surrey. IB and AP/Honors courses.</span></div>
+    </section>
+    <section>
+      <h3>Experience</h3>
+      <div class="entry"><i>March 2025</i><strong>E2 Architecture + Interiors</strong><span>Work placement at a RIBA Chartered practice in Bethnal Green. Chapel conversion: boards, Revit plans, Twinmotion visuals.</span></div>
+      <div class="entry"><i>2023 — 2024</i><strong>Front of house, Greene King and Fuller's</strong><span>Mayfair and Westminster, alongside the degree. A working knowledge of how hospitality spaces run from the inside.</span></div>
+    </section>
+    <section>
+      <h3>Industry</h3>
+      <div class="entry"><strong>Stone &amp; Surfaces Show 2026</strong><span>UK Construction Week, main stage. 5 CPD credits.</span></div>
+      <div class="entry"><strong>Futurebuild, ExCeL London</strong><span>Attended every year.</span></div>
+      <div class="entry"><strong>Milan Design Week</strong></div>
+      <div class="entry"><strong>BHMS Lucerne, 2022</strong><span>Two-week workshop on the global business and hospitality industry.</span></div>
+    </section>
+    <section>
+      <h3>Capability</h3>
+      <div class="tags"><span>Measured survey</span><span>Drawing packages</span><span>Sections &amp; details</span><span>Specification</span><span>FF&amp;E schedules</span><span>Low-carbon materials</span><span>Accessibility &amp; regulations</span><span>Physical models</span><span>Collage</span></div>
+    </section>
+    <section>
+      <h3>Software</h3>
+      <div class="tags"><span>AutoCAD</span><span>Revit</span><span>Rhino</span><span>Twinmotion</span><span>InDesign</span><span>Photoshop</span><span>Illustrator</span><span>Procreate</span></div>
+    </section>
+    <section>
+      <h3>Languages</h3>
+      <div class="tags"><span>English</span><span>Russian</span><span>Ukrainian</span></div>
+    </section>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="view wrap page" id="v-contact" hidden>
+  <div class="ph">
+    <p class="eyebrow">Contact</p>
+    <h1><span class="up"><span>Let's</span></span><span class="up"><span><em>talk</em></span></span></h1>
+  </div>
+  <div class="ct">
+    <dl class="ct-list">
+      <div class="ct-row"><dt>Email</dt><dd id="c-email">maksym614@gmail.com</dd><button class="copy" type="button" id="copy-email" data-copy="maksym614@gmail.com">Copy</button></div>
+      <div class="ct-row"><dt>LinkedIn</dt><dd><a href="https://www.linkedin.com/in/maksym-rodin-3a195b272" target="_blank" rel="noopener">maksym-rodin</a></dd><a class="copy" href="https://www.linkedin.com/in/maksym-rodin-3a195b272" target="_blank" rel="noopener">Open</a></div>
+      <div class="ct-row"><dt>Based in</dt><dd>East London</dd><span></span></div>
+    </dl>
+    <div class="ct-note">
+      <div class="clock"><i></i><span id="clock">London</span></div>
+      <p class="lead" style="font-size:clamp(24px,2.4vw,34px)">Thank you for looking through my work.</p>
+      <p>I am looking for a junior interior design or design assistant position in London, especially on projects that reuse existing and historic buildings. I am available immediately and full time.</p>
+      <p>My CV and a PDF version of this portfolio are available on request. I reply to every message.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot view" id="foot">
+  <div class="wrap">
+    <div>
+      <div class="foot-name" aria-hidden="true">Maksym Rodin</div>
+      <p style="margin-top:22px">© 2026 Maksym Rodin · Interior Architecture + Design · London. Renders are produced from my own 3D models with AI post-processing. Two concept illustrations are AI-generated. All technical drawings are my own, unassisted.</p>
+    </div>
+    <button class="top-btn" type="button" id="to-top">Back to top <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 14V2M3 7l5-5 5 5"/></svg></button>
+  </div>
+</footer>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Image viewer" aria-hidden="true">
+  <div class="lb-top"><span class="lb-count" id="lb-count"></span><button class="copy" type="button" id="lb-close">Close</button></div>
+  <div class="lb-stage" id="lb-stage"><img id="lb-img" alt=""></div>
+  <div>
+    <div class="lb-bot">
+      <button class="circle" type="button" id="lb-prev" aria-label="Previous image"><svg viewBox="0 0 16 16"><path d="M10 3 5 8l5 5"/></svg></button>
+      <span class="lb-cap" id="lb-cap"></span>
+      <button class="circle" type="button" id="lb-next" aria-label="Next image"><svg viewBox="0 0 16 16"><path d="m6 3 5 5-5 5"/></svg></button>
+    </div>
+    <div class="lb-thumbs" id="lb-thumbs"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+/* =================== content =================== */
+const SLIDES=[
+  {src:"img/ec-hero.jpg",t:"Echo Cave",d:"Retail niche, 214 Oxford Street"},
+  {src:"img/ec-mezz.jpg",t:"Echo Cave",d:"The mezzanine edge from the ground floor"},
+  {src:"img/sp-render.jpg",t:"If the Walls Could Talk",d:"37 Spital Square, Spitalfields"},
+  {src:"img/e2-render.jpg",t:"Chapel conversion",d:"E2 Architecture + Interiors"},
+  {src:"img/ty-concept.jpg",t:"The Peacock Lounge",d:"Toynbee Hall, Whitechapel"},
+  {src:"img/tb-room.jpg",t:"The Thread of Belonging",d:"28 Penton Street, Islington"}
+];
+/* gallery item: [src, caption, width, ratio, paper?, scale] */
+const P=[
+{slug:"echo-cave",yr:3,cat:"Design",title:"Echo Cave",place:"214 Oxford Street, London W1",year:"2025 — 26",cover:"img/ec-hero.jpg",tag:"Adaptive reuse of a Grade II listed department store",
+ facts:[["Location","214 Oxford Street, Westminster"],["Building","Former Peter Robinson store, Grade II listed"],["Programme","Retail hall, café, creative workshop, exhibition"],["Area","1,200 m² across two floors"],["Role","Sole designer, concept to specification"],["Drawings","Plans, sections, 1:5 details, FF&E schedule"],["Result","Final-year major project, marked 80 and 83"]],
+ lead:"A listed department store at Oxford Circus, empty and waiting for a use. I cut one carved volume through its two lower floors, like a cave inside the building.",
+ text:["Five independent brands share the ground floor with no partitions between them. Upstairs, a café, a making workshop and a quiet exhibition room give the building a life that does not depend on retail.","Every new surface is a lining set off the historic walls, so the whole fit-out could be taken out again and leave the building as it was found."],
+ hero:"img/ec-stair.jpg",
+ ch:[
+  {h:"The site",p:["Oxford Street carries around half a million people a day, and most of them never go inside. The shell is sound. The shop model that filled it has gone.","So the brief I set myself was to make the building the reason to come in, rather than one more shop that happens to sit in a listed building."],
+   g:[["img/ec-collage.jpg","Concept collage: the facade opening into a cave mouth.","w12","r219"],["img/ec-facade.jpg","The Edwardian Portland stone facade, kept in full.","w6","r43",1],["img/ec-axo.jpg","Exploded axonometric of the existing building.","w6","r43",1]]},
+  {h:"Sketching the cave",p:["The cave started as sketches of one continuous surface. The same plaster form becomes seating in one room, a counter in the next and a workbench edge in the third.","A long section study worked out how the two floors meet: a void cut so the upper level is visible from the street door."],
+   g:[["img/ec-concept-collage.jpg","The carved volume held inside the mass.","w3","r23",1],["img/ec-sk1.jpg","Ceiling folding into wall and seating.","w3","r23"],["img/ec-sk2.jpg","Café counter cut from the same surface.","w3","r23"],["img/ec-sk3.jpg","Workshop bench against the fissured wall.","w3","r23"],["img/ec-geosection.jpg","Section study: the observation level above the retail floor.","w12","r219"]]},
+  {h:"Plans and brands",p:["No walls divide the five brands. Each sits in a widening of the cave, placed by what it needs from a room.","Oud Attar sits in low light and enclosure. Santo is by the door, where turnover is fastest. 9-Jour takes the highest ceiling, because its clothes are photographed as much as bought. Jean-Baptiste Fastrez and House of Marley sit in the deeper pockets where people slow down."],
+   g:[["img/ec-plan-gf.jpg","Ground floor: retail hall, brand zones, central stair.","w6","r11",1,"1:100 at A1"],["img/ec-plan-ff.jpg","First floor: café, workshop, meditation and exhibition.","w6","r11",1,"1:100 at A1"],["img/ec-totem.jpg","Display totem and seating at the foot of the stair.","w6","r11"],["img/ec-brand-fastrez.jpg","Jean-Baptiste Fastrez.","w2","r23"],["img/ec-brand-marley.jpg","House of Marley.","w2","r23"],["img/ec-brand-9jour.jpg","9-Jour.","w2","r23"]]},
+  {h:"Getting people upstairs",p:["Upper floors on Oxford Street are usually empty of people. Here the stair is the widest object in the room, and the mezzanine can be seen from the threshold. Visitors climb because the space draws them up, not because a sign tells them to."],
+   g:[["img/ec-section.jpg","Sectional perspective through the carved volume.","w12","r219",1],["img/ec-street.jpg","Street elevation: the cave seen through the shopfront.","w12","r219"],["img/ec-mezz.jpg","The mezzanine edge from the ground floor.","w8","r43"],["img/ec-stair.jpg","The stair from the retail hall to the mezzanine.","w4","r23"]]},
+  {h:"One surface, four rooms",p:["Every room uses the same plaster surface with different light. Strips hidden in the niche reveals wash across the curves, so rooms are told apart by depth rather than colour. That is how five brands share one hall without competing."],
+   g:[["img/ec-bath.jpg","Accessible washroom, on both floors.","w6","r43"],["img/ec-workshop.jpg","Workshop bays set into the curved wall.","w6","r43"],["img/ec-meditation.jpg","Meditation and exhibition room.","w6","r43"],["img/ec-cafe.jpg","Café bar at the mezzanine edge.","w6","r43"]]},
+  {h:"Materials",p:["The palette is held to six materials so that light, not colour, shapes the space. Portland stone, terrazzo and filler-joist concrete stay from the existing building.","Everything added is bio-based or recycled, and every fixing can be undone. That reversibility is what makes the scheme possible on a listed building."],
+   g:[["img/ec-samples.jpg","Sample board. A change of material marks a change of use.","w4","r34"],["img/mat-portland.jpg","Portland stone, retained","w4","r34"],["img/mat-mycelium.jpg","Mycelium panel","w4","r34"],["img/mat-pet.jpg","Recycled PET felt","w3","r11"],["img/mat-fsc.jpg","FSC timber","w3","r11"],["img/mat-concrete.jpg","Polished concrete","w3","r11"],["img/mat-textile.jpg","Bio-textile","w3","r11"]]}
+ ]},
+{slug:"reverse-engineering",yr:2,cat:"Technical",title:"Reverse Engineering",place:"Measured survey and drawing package",year:"2024",cover:"img/re-cores.jpg",coverPaper:1,tag:"A six-storey building surveyed by hand and fully redrawn",
+ facts:[["Type","Measured survey and technical drawing package"],["Scope","Six levels, basement to fourth floor"],["Role","Sole author: survey, drawing and annotation"],["Output","Six plans, two sections, four detail sheets"],["Tools","Tape, laser, clipboard, AutoCAD"],["Result","Highest mark of my second year (73)"]],
+ lead:"A building with no drawings at all. I measured it myself over two days and redrew it as a package a contractor could work from.",
+ text:["Every sheet carries a title block, drawing number and revision field, a stated scale and a north point.","This is the kind of work a junior does from the first week in an office, and it is the project I would ask an employer to look at first."],
+ hero:"img/re-survey.jpg",heroPaper:1,
+ ch:[
+  {h:"On site",p:["Dimensions were taken with tape and laser and written in red straight onto printed bases. Every figure on the final drawings traces back to one of those notes."],
+   g:[["img/re-survey.jpg","Field survey record, six levels, dimensions in red.","w8","r11",1],["img/re-plans-2.jpg","Upper floor plans keyed to site photographs.","w4","r23",1,"1:50 at A1"],["img/re-plans-1.jpg","Basement, ground and first floor plans with photo keys.","w12","r219",1,"1:50 at A1"]]},
+  {h:"Sections",p:["Sections AA and BB cut through the stair and lift core, the parts that explain how the building works.","Line weight does the reading. Cut fabric is heaviest, visible edges lighter, surface and reference lines lighter again, so the drawing reads without a key."],
+   g:[["img/re-sections.jpg","Sections AA and BB.","w6","r34",1,"1:50 at A1"],["img/re-cores.jpg","Stair and lift core sections, layer annotated.","w6","r34",1,"1:5 and 1:10 at A1"]]},
+  {h:"Details",p:["The detail sheets go down to build-up: 215 × 102.5 × 65 mm brick on 1 mm joints, tread and riser sizes, and handrail fixings of 6 mm bar on 3 mm plate."],
+   list:["Title block, drawing number and revision on every sheet","Scale stated at the sheet size issued","North point on every plan","Four-tier line weight hierarchy","Photographs keyed to plan positions","Dimensions in millimetres, with a do-not-scale note"],
+   g:[["img/re-detail-a.jpg","Detail section through the stair and rooflight.","w6","r32",1],["img/re-detail-b.jpg","Detail section with the handrail fixing.","w6","r32",1]]}
+ ]},
+{slug:"thread-of-belonging",yr:2,cat:"Design",title:"The Thread of Belonging",place:"28 Penton Street, London N1",year:"2024 — 25",cover:"img/tb-room.jpg",tag:"A community building to remember, reflect and reform",
+ facts:[["Location","28 Penton Street, Islington"],["Programme","Community room, quiet rooms, bar"],["Role","Sole designer: survey, concept, drawing set"],["Output","Hand studies, plans at 1:50, 21 A1 sheets"],["Themes","Memory, gathering, displacement"]],
+ lead:"A narrow building in Islington turned into a place where a community can meet, remember and talk.",
+ text:["I spent the first two weeks only drawing the building as it was. That showed me two things the whole scheme rests on: the best light comes from the back, not the street, and people coming in stop by instinct at the foot of the stair.","So that is where the gathering table went. It seats twelve and it is the one thing in the building that cannot move. Everything else is arranged around it."],
+ hero:"img/tb-render-1.jpg",
+ ch:[
+  {h:"Drawing first",p:["Ink and pencil studies of the existing building came before any proposal. The sketches of the upper rooms then tested seating, shelving and a quieter reading room."],
+   g:[["img/tb-exterior.jpg","Exterior study in ink, before any change.","w4","r23"],["img/tb-sk2.jpg","Seating and shelving wall.","w4","r23"],["img/tb-sk3.jpg","The quiet room.","w4","r23"],["img/tb-moodboard.jpg","Material and furniture studies.","w6","r11",1],["img/tb-render-2.jpg","The shelving wall behind the table.","w6","r11"]]},
+  {h:"Drawings at 1:50",p:["The set was drawn at 1:50 on A3 with full title blocks, scale bars and north points. The changes are light enough that the original building still reads clearly in the finished rooms."],
+   g:[["img/tb-gf.jpg","Ground floor.","w6","r169",1,"1:50 at A3"],["img/tb-ff.jpg","First floor.","w6","r169",1,"1:50 at A3"],["img/tb-2f.jpg","Second floor.","w6","r169",1,"1:50 at A3"],["img/tb-3f.jpg","Third floor.","w6","r169",1,"1:50 at A3"]]},
+  {h:"The rooms",p:["Soft seating, a long shelving wall and bar seats at the rear window make up the rest of the building. Each room faces the daylight rather than the street."],
+   g:[["img/tb-room.jpg","The room in use, looking toward the rear light.","w12","r219"],["img/tb-quiet.jpg","The quiet room, looking toward the window.","w4","r34"],["img/tb-bar.jpg","Bar seating at the rear window.","w4","r34"],["img/tb-table.jpg","The gathering space seen from the entrance.","w4","r34"]]}
+ ]},
+{slug:"e2-architecture",yr:2,cat:"In practice",title:"E2 Architecture + Interiors",place:"Bethnal Green, London E2",year:"2025",cover:"img/e2-hero.jpg",tag:"Two weeks in practice on a chapel conversion",
+ facts:[["Practice","E2 Architecture + Interiors, RIBA Chartered"],["Specialism","Contemporary conservation and sustainable design"],["Project","Private conversion of a former chapel into a home"],["Role","Design assistant in a team of five"],["Mentor","David Obaro, Head of Visualisation"],["Dates","3 — 14 March 2025"]],
+ lead:"A two-week placement on the conversion of a former chapel into a home. I arrived without Revit or Twinmotion and left having used both on work the client saw.",
+ text:["I made the mood and materiality boards for the client presentation, sketched options for how the rooms could relate, and went on a site visit and a showroom trip to choose tiles.","I then drew the ground floor, mezzanine and general arrangement plans in Revit, and spent the last four days rendering in Twinmotion with my own textures and lighting."],
+ hero:"img/e2-hero.jpg",
+ ch:[
+  {h:"What I produced",p:["Boards and tile selection fed the client presentation. The Revit drawings and Twinmotion visuals went into the same pack."],
+   g:[["img/e2-render.jpg","The living space under the mezzanine, rendered in Twinmotion.","w12","r169"],["img/e2-dining.jpg","Dining beneath the mezzanine.","w4","r34"],["img/e2-court.jpg","The brick courtyard.","w4","r34"],["img/e2-bed.jpg","Bedroom under the pitched roof.","w4","r34"],["img/e2-ga.jpg","General arrangement views, drawn in Revit.","w6","r43",1],["img/e2-tiles.jpg","Bert & May showroom: tile selection for the client.","w6","r43",1]]},
+  {h:"What I took from it",quote:1,p:["The drawing package is where a project is really decided, and speed in the right software is a professional skill. My mentor put it simply: five hundred clicks in AutoCAD is forty in Revit. That is why I now work in both."],g:[]}
+ ]},
+{slug:"spab",yr:1,cat:"Heritage",title:"If the Walls Could Talk",place:"37 Spital Square, Spitalfields E1",year:"2023 — 24",cover:"img/sp-render.jpg",tag:"A Georgian house, home of the oldest conservation society in Europe",
+ facts:[["Location","37 Spital Square, Spitalfields"],["Client","SPAB, the Society for the Protection of Ancient Buildings"],["Building","Georgian townhouse"],["Module","DN4019 Spatial Design, term 2"],["Role","Research, concept, drawings, models"],["Output","30-spread portfolio, zig-zag book, technical set"]],
+ lead:"The brief asked what the walls of 37 Spital Square would say about the people who used them. My answer was to keep every Georgian detail and let a new social room grow inside them.",
+ text:["The SPAB was founded in 1877 by William Morris, Philip Webb and others, against restorations that erased the original character of old buildings. Its motto is “stave off decay by daily care”.","So the scheme starts from the Society's own rule. The sash windows, the Palladian window, the columns and the symmetry of the front all stay. The new room sits inside them."],
+ hero:"img/sp-cover.jpg",heroPaper:0,
+ ch:[
+  {h:"Reading the house",p:["I surveyed the rooms the Society still uses: the long meeting room with its green table, the bay window, the clock on the stair, the brass and the carved balusters.","Sketches of the rosettes and balusters came before any plan. They are the details the design was built to protect."],
+   g:[["img/sp-room.jpg","The meeting room, where the project takes place.","w4","r34"],["img/sp-bay.jpg","The bay window on the same floor.","w4","r34"],["img/sp-clock.jpg","Longcase clock on the stair.","w4","r34"],["img/sp-rosette.jpg","Pencil study of a ceiling rosette.","w6","r43"],["img/sp-baluster.jpg","Baluster profile, drawn on site.","w6","r43"]]},
+  {h:"Collage and argument",p:["The main collage splits along a red line. Above it, Georgian London stands with the SPAB house at the centre. Below it, a city with no past: towers, cranes and fire.","It is the case for the Society in one picture. Everything above the line is still here because someone chose to look after it."],
+   g:[["img/sp-collage.jpg","Final collage: the Georgian city above the line, the 21st century below.","w8","r43"],["img/sp-save.jpg","First collage, built from cut-out words.","w4","r34"],["img/zz-collage.jpg","The collage carried into the zig-zag book.","w12","r219",1]]},
+  {h:"The zig-zag book",p:["A folded A5 book recorded the site and the first concept, a café called Dream BIG, for the dreamers who come to the Society. Line drawings of the elevation, the Palladian window, the column and the railings sit beside photographs of the rooms.","The pop-up model inside uses the same symmetry as the front of the house."],
+   g:[["img/sp-zigzag.jpg","The zig-zag book unfolded.","w8","r169",1],["img/sp-popup.jpg","Pop-up model built into the pages.","w4","r34",1],["img/sp-elev.jpg","Front elevation, line drawing.","w3","r23",1],["img/zz-window.jpg","Palladian window.","w3","r23",1],["img/zz-column.jpg","Column and capital.","w3","r23",1],["img/zz-back.jpg","Back window and railing.","w3","r23",1],["img/zz-cafe.jpg","Dream BIG: the café imagined in use.","w12","r219",1]]},
+  {h:"Site and plan",p:["The site analysis mapped the Society's house against the market, Christ Church and the City towers next door. Bubble diagrams then set the order of the room: meeting, social, kitchen and quiet areas, arranged around the windows."],
+   g:[["img/sp-map.jpg","Site analysis of Spitalfields.","w6","r43",1],["img/sp-axo.jpg","Axonometric of Spital Square and its neighbours.","w6","r43",1],["img/sp-bubble.jpg","Bubble diagram of the room's zones.","w4","r11",1],["img/sp-chair.jpg","Chair study at adult seated height.","w4","r11"],["img/sp-samples.jpg","Material samples: timber, stone, wool and felt.","w4","r11"]]},
+  {h:"The proposal",p:["The final room keeps the wall panelling and windows and adds a long library wall, soft seating and a café bar. The rendered section shows the new furniture sitting below the original sash heads, never in front of them."],
+   g:[["img/sp-elev2.jpg","Rendered section through the room.","w12","r219",1,"Section A"],["img/sp-int1.jpg","Interior collage: the lounge.","w6","r11",1],["img/sp-int2.jpg","Interior collage: the café bar.","w6","r11",1],["img/sp-render.jpg","The room in use.","w12","r169"]]}
+ ]},
+{slug:"peacock-lounge",yr:1,cat:"Furniture",title:"The Peacock Lounge",place:"Toynbee Hall, Whitechapel E1",year:"2023 — 24",cover:"img/ty-concept.jpg",tag:"An Arts and Crafts furniture concept for a settlement house",
+ facts:[["Location","Meeting Room 3, Toynbee Hall"],["Building","Settlement house founded 1884"],["Inspiration","William Morris, Peacock and Dragon"],["Pieces","Peacock chair, side table, stained glass screen"],["Role","Concept, furniture design, scale model"],["Output","18-spread portfolio, white card model"]],
+ lead:"A grey meeting room in Toynbee Hall turned into a lounge, with furniture drawn from William Morris's peacock patterns.",
+ text:["Toynbee Hall was founded in 1884 by Samuel and Henrietta Barnett, to bring education and community to one of the poorest parts of London. It is one of the first settlement houses.","London is often grey. I wanted a room that lifts the mood the moment you open the door, so the colour comes from the furniture and the glass, while the room itself stays quiet."],
+ hero:"img/ty-final.jpg",
+ ch:[
+  {h:"The peacock",p:["The peacock stands for immortality, wisdom and renewal in many cultures. I drew it again and again, first over Morris's pattern, then as a line study, until the tail became a chair back."],
+   g:[["img/ty-peacock.jpg","Tracing over the peacock feather.","w6","r43"],["img/ty-drawing.jpg","Line study of the full tail.","w6","r43",1]]},
+  {h:"The chair",p:["Five designs were tested in pencil: a rattan-style shell, a fan of feathers, a lotus seat and a lounge chair. The fan won, because its back reads as a peacock from across the room."],
+   g:[["img/ty-ch3.jpg","Peacock chair, design 1.","w3","r34"],["img/ty-ch1.jpg","Design 4, the woven shell.","w3","r34"],["img/ty-ch2.jpg","Design 5, the feathered seat.","w3","r34"],["img/ty-ch4.jpg","Design 3, the lounge chair.","w3","r34"],["img/ty-model.jpg","Sketch model of the side table.","w4","r34"],["img/ty-room.jpg","White card model of Meeting Room 3.","w8","r43"]]},
+  {h:"Glass and colour",p:["The windows get a stained glass screen with gold seams in the manner of kintsugi, the Japanese repair with gold. The palette comes from the peacock itself: teal, ochre and deep oxblood on a quiet base."],
+   g:[["img/ty-concept.jpg","Concept: the peacock chairs before the coloured glass.","w8","r43"],["img/ty-palette.jpg","Colour palette.","w4","r11"],["img/ty-final.jpg","Final outcome, in colour.","w6","r43"],["img/ty-mono.jpg","The same room in tone only.","w6","r43"]]}
+ ]},
+{slug:"moleskine",yr:1,cat:"Sketchbook",title:"The Moleskine",place:"First-year sketchbook",year:"2023 — 24",cover:"img/mo-25.jpg",tag:"A year of measuring, drawing and learning to see buildings",
+ facts:[["Format","Moleskine, hand drawn, 31 spreads"],["Topics","Anthropometrics, proportion, drawing conventions, brick, windows"],["Site","Spitalfields and the Georgian city"],["Role","Everything by hand"]],
+ lead:"Before any software, there was this book. Every rule I use now in a drawing package, I first wrote out and drew here.",
+ text:["It starts with my own hand, measured and drawn at full size, and moves out through the body, the room and the street, to the brick bond and the sash window.","It ends with a paper pop-up model, the first three-dimensional thing I made at university."],
+ hero:"img/mo-25.jpg",
+ ch:[
+  {h:"The body",p:["Anthropometrics and ergonomics: how big people are and how much room they need. Reach, eye height, seated height and the four zones of personal space, all written into the book."],
+   g:[["img/mo-04.jpg","Recording my own hand measurements.","w4","r34"],["img/mo-06.jpg","Anthropometric heights and reaches.","w4","r34"],["img/mo-08.jpg","Structural and functional dimensions.","w4","r34"],["img/mo-14.jpg","Human proportion.","w6","r34"],["img/mo-15.jpg","Scale and the human figure.","w6","r34"]]},
+  {h:"Proportion and drawing",p:["The golden section worked out by hand, then found in buildings. After that, the drawing conventions: plans, sections and elevations, and what each one is for."],
+   g:[["img/mo-09.jpg","The golden mean, calculated.","w6","r34"],["img/mo-16.jpg","Orthographic drawing types for interiors.","w6","r34"]]},
+  {h:"The Georgian city",p:["Mapping Spitalfields, reading a facade, and the details that make a Georgian house: the brick bonds, the sash window and the railing."],
+   g:[["img/mo-19.jpg","Mapping the area around Spital Square.","w4","r34"],["img/mo-21.jpg","Reading the facade.","w4","r34"],["img/mo-23.jpg","Brick bonds: English, Flemish, header, stretcher, herringbone.","w4","r34"],["img/mo-25.jpg","The window, exploded.","w6","r34"],["img/mo-26.jpg","The sash window and the railing.","w6","r34"],["img/mo-31.jpg","A paper pop-up model to close the book.","w12","r169"]]}
+ ]}
+];
+P.forEach((p,i)=>p.i=i);
+
+/* =================== helpers =================== */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/&(?!amp;)/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+const still=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const fine=matchMedia("(hover:hover) and (pointer:fine)").matches;
+const ARROW='<svg viewBox="0 0 16 16"><path d="M2 8h12M9 3l5 5-5 5"/></svg>';
+const frame=(src,alt,cls="",paper=0,par=0)=>`<div class="frame ${paper?"paper":""} ${cls}" ${par?"data-par":""}><img src="${src}" alt="${esc(alt)}" loading="lazy"></div>`;
+const YEAR={1:"Year 1",2:"Year 2",3:"Year 3"};
+
+/* =================== smooth scroll =================== */
+let lenis=null;
+if(!still&&window.Lenis){try{lenis=new Lenis({duration:1.25,easing:t=>1-Math.pow(1-t,4),smoothWheel:true});const raf=t=>{lenis.raf(t);requestAnimationFrame(raf)};requestAnimationFrame(raf)}catch(e){lenis=null}}
+const scrollTop=(instant)=>lenis?lenis.scrollTo(0,{immediate:!!instant}):window.scrollTo(0,0);
+
+/* =================== loader =================== */
+(function(){
+  const n="Maksym Rodin";$("#loader-name").innerHTML=[...n].map((c,i)=>`<span style="animation-delay:${i*.035}s">${c===" "?"&nbsp;":c}</span>`).join("");
+  const done=()=>{$("#loader").classList.add("done");document.body.classList.add("ready");setTimeout(()=>$("#loader").remove(),1200)};
+  if(still){done();return}
+  setTimeout(done,1150);
+})();
+
+/* =================== home =================== */
+let si=0,timer=null;
+$("#slides").innerHTML=SLIDES.map((s,i)=>`<div class="hero-slide${i?"":" on"}"><img src="${s.src}" alt="${esc(s.d)}" ${i?'loading="lazy"':""}></div>`).join("");
+function setSlide(n){
+  const els=$$(".hero-slide");si=(n+els.length)%els.length;
+  els.forEach((e,i)=>e.classList.toggle("on",i===si));
+  $("#hero-cap").innerHTML=`<b>${SLIDES[si].t}</b><span class="mono">${SLIDES[si].d}</span>`;
+  $("#hero-count").textContent=String(si+1).padStart(2,"0")+" / "+String(els.length).padStart(2,"0");
+  const bar=$("#hero-prog");bar.classList.remove("run");void bar.offsetWidth;if(!still)bar.classList.add("run");
+}
+function auto(){clearInterval(timer);if(!still)timer=setInterval(()=>setSlide(si+1),6500)}
+setSlide(0);
+$("#next-slide").onclick=()=>{setSlide(si+1);auto()};
+$("#prev-slide").onclick=()=>{setSlide(si-1);auto()};
+
+$("#feat").innerHTML=["echo-cave","spab","thread-of-belonging","peacock-lounge"].map(s=>P.find(p=>p.slug===s)).map(p=>`
+  <a class="fcard" href="#${p.slug}" data-cursor="Open">
+    ${frame(p.cover,p.title,"",p.coverPaper,1)}
+    <div class="fcard-meta"><h3>${p.title}</h3><span class="mono">${YEAR[p.yr]} · ${p.year}</span></div>
+    <p>${esc(p.tag)}</p>
+  </a>`).join("");
+const words=["Adaptive reuse","Listed buildings","Measured survey","Drawing packages","FF&amp;E","Low-carbon materials","Hand sketching","Physical models"];
+$("#marq").innerHTML=[...words,...words].map(w=>`<span>${w}</span><span><i>✦</i></span>`).join("");
+const MOLE=P.find(p=>p.slug==="moleskine");
+$("#strip").innerHTML=MOLE.ch.flatMap(c=>c.g).map(g=>`<figure>${frame(g[0],g[1])}<figcaption>${esc(g[1])}</figcaption></figure>`).join("");
+/* drag to scroll */
+(function(){const el=$("#strip");let down=false,x0=0,s0=0,moved=0;
+  el.addEventListener("pointerdown",e=>{if(e.pointerType!=="mouse")return;down=true;moved=0;x0=e.clientX;s0=el.scrollLeft;el.classList.add("drag")});
+  addEventListener("pointermove",e=>{if(!down)return;const d=e.clientX-x0;moved=Math.max(moved,Math.abs(d));el.scrollLeft=s0-d});
+  addEventListener("pointerup",()=>{down=false;el.classList.remove("drag")});
+  el.addEventListener("wheel",e=>{if(Math.abs(e.deltaY)>Math.abs(e.deltaX))e.stopPropagation()},{passive:true});
+  el.setAttribute("data-lenis-prevent-horizontal","");
+})();
+
+/* =================== work index =================== */
+let filt="all",layout="list";
+const counts={all:P.length,3:0,2:0,1:0};P.forEach(p=>counts[p.yr]++);
+$("#chips").innerHTML=[["all","All"],[3,"Year 3"],[2,"Year 2"],[1,"Year 1"]].map(([k,l])=>`<button class="chip" type="button" data-f="${k}" aria-pressed="${k==="all"}">${l}<sup>${counts[k]}</sup></button>`).join("");
+$("#menu-count").textContent=String(P.length).padStart(2,"0");
+function drawWork(){
+  const list=P.filter(p=>filt==="all"||String(p.yr)===String(filt));
+  $("#rows").innerHTML=list.map(p=>`<li class="row"><a href="#${p.slug}" data-peek="${p.i}">
+    <span class="yr">${p.year}</span><h3>${p.title}</h3><span class="pl">${esc(p.place)}</span><span class="cat">${YEAR[p.yr]} · ${p.cat}</span>${ARROW.replace('viewBox','viewBox')}
+    <div class="row-thumb">${frame(p.cover,p.title,"in",p.coverPaper)}</div></a></li>`).join("");
+  $("#cards").innerHTML=list.map(p=>`<a class="card" href="#${p.slug}" data-cursor="Open">${frame(p.cover,p.title,"in",p.coverPaper)}
+    <div class="mono"><span>${YEAR[p.yr]} · ${p.cat}</span><span>${p.year}</span></div><h3>${p.title}</h3></a>`).join("");
+  $("#rows").hidden=layout!=="list";$("#cards").hidden=layout!=="grid";
+}
+$("#chips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;filt=b.dataset.f;$$(".chip").forEach(c=>c.setAttribute("aria-pressed",c===b));drawWork()});
+$("#as-list").onclick=()=>{layout="list";$("#as-list").setAttribute("aria-pressed",true);$("#as-grid").setAttribute("aria-pressed",false);drawWork()};
+$("#as-grid").onclick=()=>{layout="grid";$("#as-grid").setAttribute("aria-pressed",true);$("#as-list").setAttribute("aria-pressed",false);drawWork()};
+drawWork();
+/* hover peek */
+const peek=$("#peek");peek.innerHTML=P.map(p=>`<img src="${p.cover}" alt="" data-i="${p.i}" loading="lazy" style="${p.coverPaper?"object-fit:contain;background:var(--paper);padding:8%":""}">`).join("");
+let px=0,py=0,tx=0,ty=0;
+$("#rows").addEventListener("mouseover",e=>{const a=e.target.closest("[data-peek]");if(!a)return;peek.classList.add("on");peek.querySelectorAll("img").forEach(im=>im.classList.toggle("on",im.dataset.i===a.dataset.peek))});
+$("#rows").addEventListener("mouseleave",()=>peek.classList.remove("on"));
+
+/* =================== project page =================== */
+function drawProject(p){
+  const nxt=P[(p.i+1)%P.length];
+  const chapters=p.ch.map((c,ci)=>`
+    <section class="chap" id="ch-${ci}">
+      <div class="chap-head">
+        <h2><small>${String(ci+1).padStart(2,"0")} / ${String(p.ch.length).padStart(2,"0")}</small>${c.h}</h2>
+        <div class="chap-copy">${c.p.map(t=>`<p class="${c.quote?"quote":""}">${esc(t)}</p>`).join("")}
+          ${c.list?`<ul class="checks">${c.list.map(l=>`<li>${esc(l)}</li>`).join("")}</ul>`:""}</div>
+      </div>
+      ${c.g.length?`<div class="gal">${c.g.map(g=>`<figure class="g ${g[2]}">
+        <button class="frame ${g[3]} ${g[4]?"paper":""}" type="button" data-src="${g[0]}" data-cap="${esc(g[1])}" data-paper="${g[4]?1:0}" data-cursor="View"><img src="${g[0]}" alt="${esc(g[1])}" loading="lazy"></button>
+        <figcaption><span>${esc(g[1])}</span>${g[5]?`<em>${g[5]}</em>`:""}</figcaption></figure>`).join("")}</div>`:""}
+    </section>`).join("");
+  $("#v-project").innerHTML=`
+    <div class="p-hero ${p.heroPaper?"on-paper":""}">
+      ${frame(p.hero,p.title,"",p.heroPaper,1)}
+      <div class="p-title"><div class="wrap">
+        <p class="eyebrow fade">${YEAR[p.yr]} · ${p.cat} · ${p.year}</p>
+        <h1><span class="up"><span>${p.title}</span></span></h1>
+        <p class="mono fade" style="color:var(--bone-dim)">${esc(p.place)}</p>
+      </div></div>
+    </div>
+    <div class="wrap p-body">
+      <aside class="toc" aria-label="Chapters">
+        <p class="eyebrow">Contents</p>
+        <div class="toc-prog"><i id="toc-prog"></i></div>
+        <ol>${p.ch.map((c,ci)=>`<li><a href="#${p.slug}" data-ch="${ci}">${c.h}</a></li>`).join("")}</ol>
+        <a class="pill" href="#work" style="justify-self:start;padding:13px 20px">All work</a>
+      </aside>
+      <div class="p-main">
+        <div class="intro">
+          <p class="lead">${esc(p.lead)}</p>
+          <div class="intro-cols">
+            <div class="txt">${p.text.map(t=>`<p>${esc(t)}</p>`).join("")}</div>
+            <dl class="facts">${p.facts.map(f=>`<div><dt>${f[0]}</dt><dd>${esc(f[1])}</dd></div>`).join("")}</dl>
+          </div>
+        </div>
+        ${chapters}
+      </div>
+    </div>
+    <a class="next" href="#${nxt.slug}" data-cursor="Next">
+      <div class="bgimg"><img src="${nxt.cover}" alt="" loading="lazy"></div>
+      <div class="wrap"><p class="eyebrow">Next project · ${YEAR[nxt.yr]}</p><h2>${nxt.title}</h2></div>
+    </a>`;
+  $$("#v-project .toc a[data-ch]").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();const t=$("#ch-"+a.dataset.ch);lenis?lenis.scrollTo(t,{offset:-100}):t.scrollIntoView({behavior:still?"auto":"smooth"})}));
+}
+
+/* =================== router + transitions =================== */
+let current=null,busy=false;
+function keyFor(h){const proj=P.find(p=>p.slug===h);return proj?{k:"project",p:proj}:{k:["work","about","contact"].includes(h)?h:"home"}}
+function show(r){
+  $$(".view").forEach(v=>v.hidden=true);
+  $("#foot").hidden=false;
+  if(r.k==="project")drawProject(r.p);
+  const v=$("#v-"+r.k);v.hidden=false;
+  v.classList.remove("enter");void v.offsetWidth;v.classList.add("enter");
+  if(r.k==="home")auto();else clearInterval(timer);
+  $$("[data-nav]").forEach(a=>{const on=a.dataset.nav===r.k||(r.k==="project"&&a.dataset.nav==="work");on?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current")});
+  document.title=r.p?r.p.title+" · Maksym Rodin":(r.k==="home"?"Maksym Rodin Atelier":r.k[0].toUpperCase()+r.k.slice(1)+" · Maksym Rodin");
+  $("#hdr").classList.toggle("solid",r.k!=="home");
+  scrollTop(true);observe();
+  peek.classList.remove("on");
+}
+function route(){
+  const h=(location.hash||"#home").slice(1)||"home";
+  const r=keyFor(h);const id=r.k+(r.p?r.p.slug:"");
+  if(id===current)return;
+  const first=current===null;current=id;closeMenu();
+  if(first||still){show(r);return}
+  const c=$("#curtain");$("#curtain-label").textContent=r.p?r.p.title:({home:"Maksym Rodin",work:"Selected work",about:"About",contact:"Contact"})[r.k];
+  c.className="curtain cover";
+  setTimeout(()=>{show(r);c.className="curtain leave";setTimeout(()=>{c.className="curtain"},780)},680);
+}
+addEventListener("hashchange",route);
+
+/* =================== scroll-driven bits =================== */
+let io=null;
+function observe(){
+  io&&io.disconnect();
+  io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{rootMargin:"0px 0px -8% 0px"});
+  $$(".view:not([hidden]) .frame:not([data-par])").forEach(f=>{const r=f.getBoundingClientRect();if(r.top<innerHeight)f.classList.add("in");else io.observe(f)});
+}
+let lastY=0;
+function onScroll(){
+  const y=window.scrollY,vh=innerHeight;
+  const h=$("#hdr");h.classList.toggle("hide",y>lastY&&y>220&&!$("#sheet-menu").classList.contains("open"));if(current&&current!=="home")h.classList.add("solid");else h.classList.toggle("solid",y>vh*.7);lastY=y;
+  if(!still)$$(".view:not([hidden]) [data-par]").forEach(f=>{const r=f.getBoundingClientRect();if(r.bottom<0||r.top>vh)return;const c=(r.top+r.height/2-vh/2)/vh;f.style.setProperty("--py",(c*-60).toFixed(1)+"px")});
+  const tp=$("#toc-prog");
+  if(tp){const m=$(".p-main");const r=m.getBoundingClientRect();const pr=Math.min(1,Math.max(0,(vh*.4-r.top)/r.height));tp.style.transform=`scaleX(${pr})`;
+    let on=0;$$(".chap").forEach((c,i)=>{if(c.getBoundingClientRect().top<vh*.45)on=i});$$(".toc a[data-ch]").forEach(a=>a.classList.toggle("on",+a.dataset.ch===on))}
+}
+lenis?lenis.on("scroll",onScroll):addEventListener("scroll",onScroll,{passive:true});
+$("#to-top").onclick=()=>lenis?lenis.scrollTo(0,{duration:1.6}):window.scrollTo({top:0,behavior:"smooth"});
+
+/* =================== cursor =================== */
+if(fine&&!still){
+  const cur=$("#cur"),dot=cur.querySelector(".cur-dot"),ring=cur.querySelector(".cur-ring");let mx=-100,my=-100,rx=-100,ry=-100;
+  addEventListener("mousemove",e=>{mx=e.clientX;my=e.clientY;dot.style.transform=`translate(${mx}px,${my}px)`;
+    const t=e.target.closest("[data-cursor]");cur.classList.toggle("big",!!t);if(t)$("#cur-label").textContent=t.dataset.cursor});
+  (function loop(){rx+=(mx-rx)*.16;ry+=(my-ry)*.16;ring.style.transform=`translate(${rx}px,${ry}px)`;
+    tx+=(mx-tx)*.1;ty+=(my-ty)*.1;peek.style.transform=`translate(${tx+28}px,${ty-160}px) ${peek.classList.contains("on")?"scale(1)":"scale(.85)"}`;requestAnimationFrame(loop)})();
+}
+
+/* =================== menu =================== */
+function closeMenu(){$("#sheet-menu").classList.remove("open");$("#menu-open").setAttribute("aria-expanded","false");lenis&&lenis.start()}
+$("#menu-open").onclick=()=>{$("#sheet-menu").classList.add("open");$("#menu-open").setAttribute("aria-expanded","true");lenis&&lenis.stop()};
+$("#menu-close").onclick=closeMenu;
+$$("#sheet-menu a").forEach(a=>a.addEventListener("click",closeMenu));
+
+/* =================== viewer =================== */
+const lb=$("#lb");let group=[],gi=0,back=null;
+function lbShow(n){
+  gi=(n+group.length)%group.length;const b=group[gi],img=$("#lb-img");
+  img.classList.remove("on");
+  const nu=new Image();nu.onload=()=>{img.src=b.dataset.src;img.alt=b.dataset.cap;img.classList.toggle("paper",b.dataset.paper==="1");requestAnimationFrame(()=>img.classList.add("on"))};nu.src=b.dataset.src;
+  $("#lb-cap").textContent=b.dataset.cap;$("#lb-count").textContent=String(gi+1).padStart(2,"0")+" / "+String(group.length).padStart(2,"0");
+  $$("#lb-thumbs button").forEach((t,i)=>t.classList.toggle("on",i===gi));
+  const on=$("#lb-thumbs button.on");on&&on.scrollIntoView({inline:"center",block:"nearest"});
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-src]");if(!b)return;
+  group=$$(".view:not([hidden]) [data-src]");back=b;
+  $("#lb-thumbs").innerHTML=group.map((g,i)=>`<button type="button" data-i="${i}" aria-label="Image ${i+1}"><img src="${g.dataset.src}" alt="" loading="lazy"></button>`).join("");
+  lbShow(group.indexOf(b));lb.classList.add("open");lb.setAttribute("aria-hidden","false");lenis&&lenis.stop();document.body.style.overflow="hidden";$("#lb-close").focus();
+});
+$("#lb-thumbs").addEventListener("click",e=>{const t=e.target.closest("button");if(t){e.stopPropagation();lbShow(+t.dataset.i)}});
+function lbClose(){lb.classList.remove("open");lb.setAttribute("aria-hidden","true");lenis&&lenis.start();document.body.style.overflow="";back&&back.focus({preventScroll:true})}
+$("#lb-close").onclick=lbClose;$("#lb-prev").onclick=()=>lbShow(gi-1);$("#lb-next").onclick=()=>lbShow(gi+1);
+$("#lb-stage").addEventListener("click",e=>{if(e.target.id==="lb-stage")lbClose()});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){if(lb.classList.contains("open"))lbClose();else closeMenu()}
+  if(!lb.classList.contains("open"))return;
+  if(e.key==="ArrowRight")lbShow(gi+1);if(e.key==="ArrowLeft")lbShow(gi-1)});
+let sx=null;lb.addEventListener("touchstart",e=>sx=e.touches[0].clientX,{passive:true});
+lb.addEventListener("touchend",e=>{if(sx==null)return;const d=e.changedTouches[0].clientX-sx;if(Math.abs(d)>50)lbShow(gi+(d<0?1:-1));sx=null});
+
+/* =================== contact =================== */
+$$(".copy[data-copy]").forEach(b=>b.addEventListener("click",()=>{
+  const ok=()=>{b.textContent="Copied";b.classList.add("ok");setTimeout(()=>{b.textContent="Copy";b.classList.remove("ok")},1600)};
+  const sel=()=>{const r=document.createRange();r.selectNodeContents(b.previousElementSibling);const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent="Selected"};
+  try{navigator.clipboard.writeText(b.dataset.copy).then(ok,sel)}catch(e){sel()}
+}));
+function tick(){try{$("#clock").textContent="London · "+new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/London",hour:"2-digit",minute:"2-digit"}).format(new Date())+" · available for work"}catch(e){}}
+tick();setInterval(tick,30000);
+
+route();
+</script>
+
+</body></html>
